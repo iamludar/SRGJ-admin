@@ -43,6 +43,9 @@ export default {
     exportZip: 'zip',
     theme: '换肤',
     clipboardDemo: 'clipboard',
-    i18n: '国际化'
+    i18n: '国际化',
+    member: '会员管理',
+    message: '信息管理',
+    order: '订单管理'
   }
 }

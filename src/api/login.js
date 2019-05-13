@@ -1,12 +1,12 @@
 import request from '@/utils/request'
 
-export function loginByUsername(username, password) {
+export function loginByUsername(name, pass) {
   const data = {
-    username,
-    password
+    name,
+    pass
   }
   return request({
-    url: '/login/login',
+    url: '/user/login?_format=json',
     method: 'post',
     data
   })
@@ -19,11 +19,10 @@ export function logout() {
   })
 }
 
-export function getUserInfo(token) {
+export function getUserInfo(uid) {
   return request({
-    url: '/user/info',
-    method: 'get',
-    params: { token }
+    url: '/taoapi/userinfo?uid=' + uid,
+    method: 'get'
   })
 }
 
