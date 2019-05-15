@@ -1,6 +1,10 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="订单编号" v-model="listQuery.order_no" clearable> 
+      </el-input>
+      <el-input @keyup.enter.native="handleFilter" style="width: 350px;" class="filter-item" placeholder="商品名称" v-model="listQuery.title" clearable> 
+      </el-input>
       <el-select clearable class="filter-item" v-model="listQuery.status" placeholder="订单状态">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item">
         </el-option>
@@ -44,9 +48,9 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单状态" width="100">
+      <el-table-column align="center" label="状态" width="70">
         <template slot-scope="scope">
-          <span>{{scope.row.field_order_status}}</span>
+          <el-tag size="mini" :type="scope.row.field_order_status | typeFilter">{{scope.row.field_order_status | typeTextFilter}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column align="center" label="订单编号" width="200">
@@ -178,7 +182,7 @@ export default {
       },
       totalQuery: {},
       typeOptions: ['聚划算', '天猫', '淘宝'],
-      statusOptions: ['已返利', '订单结算', '订单付款', '订单失败'],
+      statusOptions: ['已返利', '订单结算', '订单付款', '订单失效'],
       sortOptions: [{ label: '按ID升序列', key: '+id' }, { label: '按ID降序', key: '-id' }],
       showAuditor: false,
       temp: {
@@ -212,6 +216,22 @@ export default {
         published: 'success',
         draft: 'info',
         deleted: 'danger'
+      }
+      return statusMap[status]
+    },
+    typeFilter(status) {
+      const statusMap = {
+        '订单失效': 'info',
+        '订单付款': '',
+        '订单结算': 'success'
+      }
+      return statusMap[status]
+    },
+    typeTextFilter(status) {
+      const statusMap = {
+        '订单失效': '失效',
+        '订单付款': '付款',
+        '订单结算': '结算'
       }
       return statusMap[status]
     }
