@@ -46,6 +46,7 @@ export default {
     i18n: '国际化',
     member: '会员管理',
     message: '信息管理',
-    order: '订单管理'
+    order: '订单管理',
+    gongzhonghao: '公众号管理'
   }
 }

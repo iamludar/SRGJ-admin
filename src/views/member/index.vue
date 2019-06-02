@@ -7,6 +7,8 @@
       </el-input>
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="京东ID" v-model="listQuery.jdadzoneid" clearable>
       </el-input>
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="openid" v-model="listQuery.openid" clearable>
+      </el-input>
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="推荐人" v-model="listQuery.parentid" clearable>
       </el-input>
       <el-select clearable style="width: 90px" class="filter-item" v-model="listQuery.level" placeholder="等级">
@@ -29,11 +31,11 @@
           <img :src="scope.row.headimgurl" class="avatar"/>
         </template>
       </el-table-column>
-<!--       <el-table-column align="left" label="OPENID" width="250px">
+      <el-table-column align="left" label="OPENID" width="250px">
         <template slot-scope="scope">
           <span>{{scope.row.openid}}</span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column align="center" label="省份" width="100">
         <template slot-scope="scope">
           <span>{{scope.row.province}}</span>

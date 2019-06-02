@@ -39,7 +39,7 @@ export const constantRouterMap = [
 ]
 
 export default new Router({
-  // mode: 'history', //后端支持可开
+  mode: 'history',
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
@@ -88,6 +88,22 @@ export const asyncRouterMap = [
       name: 'order',
       meta: {
         title: 'order',
+        icon: 'lock',
+        role: ['administrator']
+      }
+    }]
+  },
+  {
+    path: '/gongzhonghao',
+    component: Layout,
+    redirect: '/gongzhonghao/index',
+    meta: { role: ['administrator'] },
+    children: [{
+      path: 'index',
+      component: _import('gongzhonghao/index'),
+      name: 'gongzhonghao',
+      meta: {
+        title: 'gongzhonghao',
         icon: 'lock',
         role: ['administrator']
       }

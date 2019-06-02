@@ -1,18 +1,16 @@
 <template>
   <div class="app-container calendar-list-container">
-    <div class="filter-container">
+    <div class="filter-container" v-show="!isEmpty">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="昵称" v-model="listQuery.nickname" clearable>
+      </el-input>
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="淘宝ID" v-model="listQuery.adzoneid" clearable> 
       </el-input>
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="订单编号" v-model="listQuery.order_no" clearable> 
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="京东ID" v-model="listQuery.jdadzoneid" clearable>
       </el-input>
-      <el-input @keyup.enter.native="handleFilter" style="width: 350px;" class="filter-item" placeholder="商品名称" v-model="listQuery.title" clearable> 
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="推荐人" v-model="listQuery.parentid" clearable>
       </el-input>
-      <el-select clearable class="filter-item" v-model="listQuery.status" placeholder="订单状态">
-        <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item">
-        </el-option>
-      </el-select>
-      <el-select clearable class="filter-item" v-model="listQuery.type" placeholder="购物平台">
-        <el-option v-for="item in typeOptions" :key="item" :label="item" :value="item">
+      <el-select clearable style="width: 90px" class="filter-item" v-model="listQuery.level" placeholder="等级">
+        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
@@ -20,105 +18,63 @@
     </div>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-      style="width: 100%">
-      <el-table-column type="expand">
-        <template slot-scope="props">
-          <el-form label-position="left" inline class="order-title">
-            <el-form-item label="所属店铺">
-              <span>{{ props.row.title }}</span>
-            </el-form-item>
-          </el-form>
-          <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="所属店铺">
-              <span>{{ props.row.field_shop }}</span>
-            </el-form-item>
-            <el-form-item label="商品编号">
-              <span>{{ props.row.field_product_id }}</span>
-            </el-form-item>
-            <el-form-item label="旺旺名称">
-              <span>{{ props.row.field_seller_wangwang }}</span>
-            </el-form-item>
-            <el-form-item label="商品分类">
-              <span>{{ props.row.field_category }}</span>
-            </el-form-item>
-            <el-form-item label="店铺地址">
-              <span>{{ props.row.address }}</span>
-            </el-form-item>
-            <el-form-item label="商品描述">
-              <span>{{ props.row.desc }}</span>
-            </el-form-item>
-          </el-form>
+      style="width: 100%" v-show="!isEmpty">
+      <el-table-column align="center" label="公众号" width="265">
+        <template slot-scope="scope">
+          <img :src="scope.row.headimgurl" class="avatar"/>
+          <span>陆大和他的小伙伴们的省钱工具</span>
+          <span>iamludar</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="状态" width="70">
+      <el-table-column align="center" label="账号类型" width="100">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.field_order_status | typeFilter">{{scope.row.field_order_status | typeTextFilter}}</el-tag>
+          <span>{{scope.row.province1}}订阅号</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单编号" width="200">
+      <el-table-column align="center" label="认证状态" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.field_order_no}}</span>
+          <span>{{scope.row.city1}}未认证</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="创建时间" width="160">
+      <el-table-column align="center" label="粉丝数" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.field_create_time}}</span>
+          <span>{{scope.row.nickname1}}11</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="结算时间" width="160">
+      <el-table-column align="center" label="互动粉丝数" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.field_cut_off_time}}</span>
+          <span>{{scope.row.adzoneid1}}111</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="付款金额" width="100">
+      <el-table-column align="center" label="所属分组" width="120">
         <template slot-scope="scope">
-           <span>{{scope.row.field_payment_amount}}</span>
+          <span>{{scope.row.jdadzoneid1}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="结算金额" width="100">
+      <el-table-column align="center" label="授权时间" width="150">
         <template slot-scope="scope">
-           <span>{{scope.row.field_settlement_amount}}</span>
+          <span>{{scope.row.subscribe_time}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="收入比率" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_peg}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" label="预估收入" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_forecast_income}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" label="预估收入" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_forecast_income}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" label="来源平台" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_order_type}}</span>
-        </template>
-      </el-table-column>
-<!--       <el-table-column align="left" label="OPENID" width="250px">
-        <template slot-scope="scope">
-          <span>{{scope.row.openid}}</span>
-        </template>
-      </el-table-column> -->
-      <el-table-column align="center" label="操作" min-width="120" class-name="small-padding">
+      <el-table-column align="center" label="操作" min-width="220" class-name="small-padding">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button v-if="scope.row.status!='published'" size="mini" type="success" @click="handleModifyStatus(scope.row,'published')">发布
+          </el-button>
+          </el-button>
+          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-
-
-    <div v-show="!listLoading" class="pagination-container">
+    <div v-show="!listLoading && !isEmpty" class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageStart"
         :page-sizes="[10,20,30, 50]" :page-size="listQuery.items_per_page" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
-
+    <div v-show="isEmpty">
+        <el-button type="primary" @click="shouquan">授 权</el-button>
+    </div>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="70px" style='width: 400px; margin-left:50px;'>
         <el-form-item label="时间" prop="timestamp">
@@ -148,22 +104,12 @@
         <el-button v-else type="primary" @click="updateData">确 定</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog title="阅读数统计" :visible.sync="dialogPvVisible">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="渠道"> </el-table-column>
-        <el-table-column prop="pv" label="pv"> </el-table-column>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
-
   </div>
 </template>
 
 <script>
-import { orderList, orderTotal } from '@/api/order'
+import { memberList, memberTotal, updateMember } from '@/api/member'
+import { getPreCode } from '@/api/shouquan'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -174,18 +120,20 @@ export default {
   },
   data() {
     return {
+      pre_auth_code: '',
       tableKey: 0,
       list: null,
       total: null,
       listLoading: true,
+      isEmpty: true,
       listQuery: {
         pageStart: 1,
         items_per_page: 10
       },
       totalQuery: {},
-      typeOptions: ['聚划算', '天猫', '淘宝'],
-      statusOptions: ['已返利', '订单结算', '订单付款', '订单失效'],
+      importanceOptions: ['vip', 'wangzhe', ''],
       sortOptions: [{ label: '按ID升序列', key: '+id' }, { label: '按ID降序', key: '-id' }],
+      statusOptions: ['published', 'draft', 'deleted'],
       showAuditor: false,
       temp: {
         id: undefined,
@@ -220,22 +168,6 @@ export default {
         deleted: 'danger'
       }
       return statusMap[status]
-    },
-    typeFilter(status) {
-      const statusMap = {
-        '订单失效': 'info',
-        '订单付款': '',
-        '订单结算': 'success'
-      }
-      return statusMap[status]
-    },
-    typeTextFilter(status) {
-      const statusMap = {
-        '订单失效': '失效',
-        '订单付款': '付款',
-        '订单结算': '结算'
-      }
-      return statusMap[status]
     }
   },
   created() {
@@ -246,15 +178,20 @@ export default {
     getTotal() {
       this.totalQuery = Object.assign({}, this.listQuery)
       this.totalQuery.items_per_page = 'All'
-      orderTotal(this.totalQuery).then(response => {
+      memberTotal(this.totalQuery).then(response => {
         this.total = response.data.length
       })
     },
     getList() {
       this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
       this.listLoading = true
-      orderList(this.listQuery).then(response => {
-        this.list = response.data
+      memberList(this.listQuery).then(response => {
+        this.list = []
+        if(this.list.length >0){
+          this.isEmpty = false
+        }else{
+          this.isEmpty =true
+        }
         this.listLoading = false
       })
     },
@@ -300,24 +237,13 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    // createData() {
-    //   this.$refs['dataForm'].validate((valid) => {
-    //     if (valid) {
-    //       this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-    //       this.temp.author = '原创作者'
-    //       createArticle(this.temp).then(() => {
-    //         this.list.unshift(this.temp)
-    //         this.dialogFormVisible = false
-    //         this.$notify({
-    //           title: '成功',
-    //           message: '创建成功',
-    //           type: 'success',
-    //           duration: 2000
-    //         })
-    //       })
-    //     }
-    //   })
-    // },
+    shouquan() {
+      getPreCode().then(response =>{
+        this.pre_auth_code = response.data.pre_auth_code
+        const url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid=wxa648f31a57e15a36&pre_auth_code='+this.pre_auth_code+'&redirect_uri=http://srgjadmin.04wu.com/gongzhonghao/index&auth_type=1'
+        window.open(url, '_blank');
+      })
+    },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
@@ -381,21 +307,5 @@ export default {
 .avatar{
   width:22px;
   height: 22px;
-}
-.demo-table-expand {
-  font-size: 0;
-}
-.demo-table-expand label {
-  width: 90px;
-  color: #99a9bf;
-}
-.demo-table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-  width: 50%;
-}
-.order-title .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
 }
 </style>
