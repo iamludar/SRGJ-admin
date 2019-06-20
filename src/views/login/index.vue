@@ -20,11 +20,8 @@
       </el-form-item>
 
       <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">登录</el-button>
-
       <div class="tips">账号:admin 密码随便填</div>
       <div class="tips">账号:editor  密码随便填</div>
-      <a href="https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid=wxa648f31a57e15a36&pre_auth_code=preauthcode@@@JbyZAOYCFq4ehmPhc3Ym5mzM9tvYhiIIa0LC6QT9du6Emf_Ji7y8MP7yQpcTUX3N&redirect_uri=srgjadmin.04wu.com/&auth_type=1">授权登录</a>
-
       <el-button class="thirdparty-button" type="primary" @click="showDialog=true">打开第三方登录</el-button>
     </el-form>
 
