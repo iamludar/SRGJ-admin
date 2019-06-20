@@ -7,9 +7,24 @@
           <span>{{scope.row.id}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="头像" width="65">
+      <!-- <el-table-column align="center" label="头像" width="65">
         <template slot-scope="scope">
           <img :src="scope.row.headimgurl" class="avatar"/>
+        </template>
+      </el-table-column> -->
+      <el-table-column align="left" label="消息类型" width="80">
+        <template slot-scope="scope">
+          <span>{{scope.row.msg_type}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="left" label="发送者" width="280">
+        <template slot-scope="scope">
+          <span>{{scope.row.from_user_name}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="left" label="接收者" width="180">
+        <template slot-scope="scope">
+          <span>{{scope.row.to_user_name}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="查询时间" width="150">
@@ -37,7 +52,7 @@
 
     <div v-show="!listLoading" class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageStart"
-        :page-sizes="[10,20,30, 50]" :page-size="listQuery.items_per_page" layout="total, sizes, prev, pager, next, jumper" :total="total">
+        :page-sizes="[10,20,30, 50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
 
@@ -85,7 +100,7 @@
 </template>
 
 <script>
-import { messageList, messageTotal } from '@/api/message'
+import { messageList } from '@/api/message'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -102,7 +117,7 @@ export default {
       listLoading: true,
       listQuery: {
         pageStart: 1,
-        items_per_page: 10
+        pageSize: 10
       },
       totalQuery: {},
       importanceOptions: ['vip', 'wangzhe', ''],
@@ -145,39 +160,27 @@ export default {
     }
   },
   created() {
-    this.getTotal()
     this.getList()
   },
   methods: {
-    getTotal() {
-      this.totalQuery = Object.assign({}, this.listQuery)
-      this.totalQuery.items_per_page = 'All'
-      messageTotal(this.totalQuery).then(response => {
-        this.total = response.data.length
-      })
-    },
     getList() {
-      this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
       this.listLoading = true
       messageList(this.listQuery).then(response => {
-        this.list = response.data
+        this.list = response.data.data
+        this.total = response.data.count
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.pageStart = 1
-      this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
-      this.getTotal()
       this.getList()
     },
     handleSizeChange(val) {
-      this.listQuery.items_per_page = val
-      this.getTotal()
+      this.listQuery.pageSize = val
       this.getList()
     },
     handleCurrentChange(val) {
-      this.listQuery.page = val
-      this.getTotal()
+      this.listQuery.pageStart = val
       this.getList()
     },
     handleModifyStatus(row, status) {
@@ -238,22 +241,22 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateMember(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
-          })
+          // updateMember(tempData).then(() => {
+          //   for (const v of this.list) {
+          //     if (v.id === this.temp.id) {
+          //       const index = this.list.indexOf(v)
+          //       this.list.splice(index, 1, this.temp)
+          //       break
+          //     }
+          //   }
+          //   this.dialogFormVisible = false
+          //   this.$notify({
+          //     title: '成功',
+          //     message: '更新成功',
+          //     type: 'success',
+          //     duration: 2000
+          //   })
+          // })
         }
       })
     },

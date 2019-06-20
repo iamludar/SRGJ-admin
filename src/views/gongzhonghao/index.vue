@@ -1,6 +1,6 @@
 <template>
   <div class="app-container calendar-list-container">
-    <div class="filter-container" v-show="!isEmpty">
+    <div class="filter-container">
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="昵称" v-model="listQuery.nickname" clearable>
       </el-input>
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="淘宝ID" v-model="listQuery.adzoneid" clearable> 
@@ -14,29 +14,33 @@
         </el-option>
       </el-select>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-      <!--<el-checkbox class="filter-item" style='margin-left:15px;' @change='tableKey=tableKey+1' v-model="showAuditor">显示无效用户</el-checkbox>-->
+      <el-button type="primary" @click="shouquan" class="filter-item">授权</el-button>
     </div>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       style="width: 100%" v-show="!isEmpty">
-      <el-table-column align="center" label="公众号" width="265">
+      <el-table-column align="center" label="头像" width="80">
         <template slot-scope="scope">
-          <img :src="scope.row.headimgurl" class="avatar"/>
-          <span>陆大和他的小伙伴们的省钱工具</span>
-          <span>iamludar</span>
+          <div><img :src="scope.row.head_img" class="avatar"/></div>
+        </template>
+      </el-table-column>
+      <el-table-column align="left" label="公众号" width="300">
+        <template slot-scope="scope">
+          <div><span>{{ scope.row.nick_name }}</span></div>
+          <div><span>{{ scope.row.alias }}</span></div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="账号类型" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.province1}}订阅号</span>
+          <span>{{scope.row.principal_name}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="认证状态" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.city1}}未认证</span>
+          <span>{{scope.row.city1}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="粉丝数" width="100">
+     <!--  <el-table-column align="center" label="粉丝数" width="100">
         <template slot-scope="scope">
           <span>{{scope.row.nickname1}}11</span>
         </template>
@@ -45,7 +49,7 @@
         <template slot-scope="scope">
           <span>{{scope.row.adzoneid1}}111</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column align="center" label="所属分组" width="120">
         <template slot-scope="scope">
           <span>{{scope.row.jdadzoneid1}}</span>
@@ -53,7 +57,7 @@
       </el-table-column>
       <el-table-column align="center" label="授权时间" width="150">
         <template slot-scope="scope">
-          <span>{{scope.row.subscribe_time}}</span>
+          <span>{{scope.row.create_time}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" min-width="220" class-name="small-padding">
@@ -71,9 +75,6 @@
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageStart"
         :page-sizes="[10,20,30, 50]" :page-size="listQuery.items_per_page" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
-    </div>
-    <div v-show="isEmpty">
-        <el-button type="primary" @click="shouquan">授 权</el-button>
     </div>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="70px" style='width: 400px; margin-left:50px;'>
@@ -108,8 +109,7 @@
 </template>
 
 <script>
-import { memberList, memberTotal, updateMember } from '@/api/member'
-import { getPreCode } from '@/api/shouquan'
+import { getPreCode, getAuthUserinfo, authList } from '@/api/shouquan'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -171,26 +171,30 @@ export default {
     }
   },
   created() {
-    this.getTotal()
+    if (this.$route.query.auth_code && document.URL !== document.referrer) {
+      this.getAuth()
+    }
     this.getList()
   },
   methods: {
-    getTotal() {
-      this.totalQuery = Object.assign({}, this.listQuery)
-      this.totalQuery.items_per_page = 'All'
-      memberTotal(this.totalQuery).then(response => {
-        this.total = response.data.length
+    getAuth() {
+      const query = {
+        'auth_code': this.$route.query.auth_code
+      }
+      getAuthUserinfo(query).then(response => {
+        console.log(response)
       })
     },
     getList() {
       this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
       this.listLoading = true
-      memberList(this.listQuery).then(response => {
-        this.list = []
-        if(this.list.length >0){
+      authList(this.listQuery).then(response => {
+        this.list = response.data.data
+        this.total = response.data.count
+        if (this.list.length > 0) {
           this.isEmpty = false
-        }else{
-          this.isEmpty =true
+        } else {
+          this.isEmpty = true
         }
         this.listLoading = false
       })
@@ -198,7 +202,6 @@ export default {
     handleFilter() {
       this.listQuery.pageStart = 1
       this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
-      this.getTotal()
       this.getList()
     },
     handleSizeChange(val) {
@@ -238,10 +241,11 @@ export default {
       })
     },
     shouquan() {
-      getPreCode().then(response =>{
-        this.pre_auth_code = response.data.pre_auth_code
-        const url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid=wxa648f31a57e15a36&pre_auth_code='+this.pre_auth_code+'&redirect_uri=http://srgjadmin.04wu.com/gongzhonghao/index&auth_type=1'
-        window.open(url, '_blank');
+      getPreCode().then(response => {
+        console.log(response)
+        this.pre_auth_code = response.data.data.pre_auth_code
+        const url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?component_appid=wxa648f31a57e15a36&pre_auth_code=' + this.pre_auth_code + '&redirect_uri=http://srgjadmin.04wu.com/gongzhonghao/index&auth_type=1'
+        window.open(url, '_self')
       })
     },
     handleUpdate(row) {
@@ -258,22 +262,22 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateMember(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
-          })
+          // updateMember(tempData).then(() => {
+          //   for (const v of this.list) {
+          //     if (v.id === this.temp.id) {
+          //       const index = this.list.indexOf(v)
+          //       this.list.splice(index, 1, this.temp)
+          //       break
+          //     }
+          //   }
+          //   this.dialogFormVisible = false
+          //   this.$notify({
+          //     title: '成功',
+          //     message: '更新成功',
+          //     type: 'success',
+          //     duration: 2000
+          //   })
+          // })
         }
       })
     },

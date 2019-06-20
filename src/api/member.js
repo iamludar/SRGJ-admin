@@ -2,15 +2,7 @@ import request from '@/utils/request'
 
 export function memberList(query) {
   return request({
-    url: '/wechatuserlist?_format=json',
-    method: 'get',
-    params: query
-  })
-}
-
-export function memberTotal(query) {
-  return request({
-    url: '/wechatuserlist?_format=json',
+    url: '/wechat/userlist',
     method: 'get',
     params: query
   })

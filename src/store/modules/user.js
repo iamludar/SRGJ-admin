@@ -70,7 +70,7 @@ const user = {
           const data = response.data
           commit('SET_ROLES', data.roles)
           commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
+          commit('SET_AVATAR', 'http://thirdwx.qlogo.cn/mmopen/8Zg6QPBeP0ssLgJlNyPibAm4YwC6jFcdAR0t04vG4Eeq258s0tsoGYPvheLlVQQDhXXiaggo7qRrvycodYicndMBUn4D6hDbBIJ/132')
           commit('SET_INTRODUCTION', data.introduction)
           resolve(response)
         }).catch(error => {

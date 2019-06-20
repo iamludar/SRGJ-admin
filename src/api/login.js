@@ -21,7 +21,7 @@ export function logout() {
 
 export function getUserInfo(uid) {
   return request({
-    url: '/taoapi/userinfo?uid=' + uid,
+    url: '/wechat/userinfo?uid=' + uid,
     method: 'get'
   })
 }

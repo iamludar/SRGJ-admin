@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function messageList(query) {
   return request({
-    url: '/requestmessage?_format=json',
+    url: '/wechat/messagelist',
     method: 'get',
     params: query
   })

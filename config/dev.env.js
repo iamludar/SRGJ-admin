@@ -1,5 +1,5 @@
 module.exports = {
 	NODE_ENV: '"development"',
 	ENV_CONFIG: '"dev"',
-	BASE_API: '"https://taoapi.04wu.com"'
+	BASE_API: '"https://daili.04wu.com"'
 }
