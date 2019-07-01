@@ -30,7 +30,7 @@
           <div><span>{{ scope.row.alias }}</span></div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="账号类型" width="100">
+      <el-table-column align="center" label="主体单位" min-width="100">
         <template slot-scope="scope">
           <span>{{scope.row.principal_name}}</span>
         </template>

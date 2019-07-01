@@ -7,7 +7,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">总用户数</div>
-          <count-to class="card-panel-num" :startVal="0" :endVal="102400" :duration="3600"></count-to>
+          <count-to class="card-panel-num" :startVal="0" :endVal="panelData.wechat_user_count" :duration="3600"></count-to>
         </div>
       </div>
     </el-col>
@@ -18,7 +18,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">消息总数</div>
-          <count-to class="card-panel-num" :startVal="0" :endVal="81212" :duration="4000"></count-to>
+          <count-to class="card-panel-num" :startVal="0" :endVal="panel_data.wechat_request_message_count" :duration="4000"></count-to>
         </div>
       </div>
     </el-col>
@@ -29,7 +29,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">佣金总额</div>
-          <count-to class="card-panel-num" :startVal="0" :endVal="9280" :duration="4000"></count-to>
+          <count-to class="card-panel-num" :startVal="0" :endVal="panelData.total_commission_fee_total" :duration="4000"></count-to>
         </div>
       </div>
     </el-col>
@@ -40,7 +40,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">订单总数</div>
-          <count-to class="card-panel-num" :startVal="0" :endVal="13600" :duration="4600"></count-to>
+          <count-to class="card-panel-num" :startVal="0" :endVal="panelData.tk_order_count" :duration="4600"></count-to>
         </div>
       </div>
     </el-col>
@@ -48,13 +48,37 @@
 </template>
 
 <script>
+import { dataList } from '@/api/front'
 import CountTo from 'vue-count-to'
 
 export default {
   components: {
     CountTo
   },
+  data() {
+    return {
+      panel_data: {
+        wechat_user_count: 0,
+        wechat_request_message_count: 0,
+        tk_order_count: 0,
+        total_commission_fee_total: 0
+      }
+    }
+  },
+  computed: {
+    panelData() {
+      return this.panel_data
+    }
+  },
+  created() {
+    this.getData()
+  },
   methods: {
+    getData() {
+      dataList().then(response => {
+        this.panel_data = response.data.panel_data
+      })
+    },
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
     }

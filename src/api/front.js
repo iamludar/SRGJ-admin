@@ -1,10 +1,9 @@
 import request from '@/utils/request'
 
-export function orderList(query) {
+export function dataList(query) {
   return request({
-    url: '/wechat/orderlist',
+    url: '/wechat/frontdata',
     method: 'get',
     params: query
   })
 }
-

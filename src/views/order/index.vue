@@ -52,52 +52,54 @@
       </el-table-column>
       <el-table-column align="center" label="状态" width="70">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.field_order_status | typeFilter">{{scope.row.field_order_status | typeTextFilter}}</el-tag>
+          <el-tag size="mini" :type="scope.row.tk_status | typeFilter">{{scope.row.tk_status | typeTextFilter}}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单编号" width="200">
+      <el-table-column align="center" label="商品图片" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.field_order_no}}</span>
+          <img :src="scope.row.item_img | imageFilter" @click="go(scope.row.item_link)"/>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="创建时间" width="160">
+      <el-table-column align="left" label="商品信息" min-width="300">
         <template slot-scope="scope">
-          <span>{{scope.row.field_create_time}}</span>
+          <div class="item_title">{{scope.row.item_title}}</div>
+          <div class="seller_shop_title">{{scope.row.seller_shop_title}}</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="结算时间" width="160">
+      <el-table-column align="center" label="订单编号" width="180">
         <template slot-scope="scope">
-          <span>{{scope.row.field_cut_off_time}}</span>
+          <div>{{scope.row.trade_parent_id}}</div>
+          <div>{{scope.row.trade_id}}</div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="时间节点" width="240">
+        <template slot-scope="scope">
+          <div>点击时间：{{scope.row.click_time}}</div>
+          <div>订单创建：{{scope.row.tk_create_time}}</div>
+          <div v-if="scope.row.tb_paid_time !=='' && scope.row.tb_paid_time !== null">付款时间：{{scope.row.tb_paid_time}}</div>
+          <div v-if="scope.row.tk_earning_time !=='' && scope.row.tk_earning_time !== null">商家返佣：{{scope.row.tk_earning_time}}</div>
         </template>
       </el-table-column>
       <el-table-column align="left" label="付款金额" width="100">
         <template slot-scope="scope">
-           <span>{{scope.row.field_payment_amount}}</span>
+           <span>{{scope.row.alipay_total_price}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="结算金额" width="100">
+      <el-table-column align="left" label="佣金金额" width="100">
         <template slot-scope="scope">
-           <span>{{scope.row.field_settlement_amount}}</span>
+          <div>付:{{scope.row.pub_share_pre_fee}}</div>
+          <div>结:{{scope.row.pub_share_fee}}</div>
+          <div>佣:{{scope.row.total_commission_fee + scope.row.subsidy_fee}}</div>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="收入比率" width="100">
+      <el-table-column align="left" label="提成" width="100">
         <template slot-scope="scope">
-           <span>{{scope.row.field_peg}}</span>
+           <span>{{scope.row.tk_total_rate }}%</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" label="预估收入" width="100">
+      <el-table-column align="left" label="技术服务费" width="100">
         <template slot-scope="scope">
-           <span>{{scope.row.field_forecast_income}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" label="预估收入" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_forecast_income}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="left" label="来源平台" width="100">
-        <template slot-scope="scope">
-           <span>{{scope.row.field_order_type}}</span>
+           <span>{{scope.row.alimama_share_fee}}</span>
         </template>
       </el-table-column>
 <!--       <el-table-column align="left" label="OPENID" width="250px">
@@ -115,7 +117,7 @@
 
     <div v-show="!listLoading" class="pagination-container">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageStart"
-        :page-sizes="[10,20,30, 50]" :page-size="listQuery.items_per_page" layout="total, sizes, prev, pager, next, jumper" :total="total">
+        :page-sizes="[10,20,30, 50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
 
@@ -163,7 +165,7 @@
 </template>
 
 <script>
-import { orderList, orderTotal } from '@/api/order'
+import { orderList } from '@/api/order'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -180,7 +182,7 @@ export default {
       listLoading: true,
       listQuery: {
         pageStart: 1,
-        items_per_page: 10
+        pageSize: 10
       },
       totalQuery: {},
       typeOptions: ['聚划算', '天猫', '淘宝'],
@@ -223,55 +225,50 @@ export default {
     },
     typeFilter(status) {
       const statusMap = {
-        '订单失效': 'info',
-        '订单付款': '',
-        '订单结算': 'success'
+        '13': 'info',
+        '12': '',
+        '3': 'success'
       }
       return statusMap[status]
     },
     typeTextFilter(status) {
       const statusMap = {
-        '订单失效': '失效',
-        '订单付款': '付款',
-        '订单结算': '结算'
+        '13': '失效',
+        '12': '付款',
+        '3': '结算'
       }
       return statusMap[status]
+    },
+    imageFilter(url) {
+      return url + '_60x60.jpg'
     }
   },
-  activated() {
-    this.getTotal()
+  created() {
+    console.log('初始化')
     this.getList()
   },
   methods: {
-    getTotal() {
-      this.totalQuery = Object.assign({}, this.listQuery)
-      this.totalQuery.items_per_page = 'All'
-      orderTotal(this.totalQuery).then(response => {
-        this.total = response.data.length
-      })
+    go(e) {
+      window.open(e, '_blank')
     },
     getList() {
-      this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
       this.listLoading = true
+
       orderList(this.listQuery).then(response => {
-        this.list = response.data
+        this.list = response.data.data
+        this.total = response.data.count
         this.listLoading = false
       })
     },
     handleFilter() {
       this.listQuery.pageStart = 1
-      this.listQuery.page = parseInt(this.listQuery.pageStart) - 1
-      this.getTotal()
       this.getList()
     },
     handleSizeChange(val) {
-      this.listQuery.items_per_page = val
-      this.getTotal()
+      this.listQuery.pageSize = val
       this.getList()
     },
     handleCurrentChange(val) {
-      this.listQuery.page = val
-      this.getTotal()
       this.getList()
     },
     handleModifyStatus(row, status) {
@@ -397,5 +394,8 @@ export default {
 .order-title .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
+}
+.seller_shop_title,.item_title{
+  font-size: 0.8em;
 }
 </style>
